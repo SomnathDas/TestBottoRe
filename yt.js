@@ -36,6 +36,7 @@ exports.mp3 = async function (message) {
   await gclient.reply(message.from, 'Audio downloading', message.id.toString())
   // waiter = await downloadmp3(link, message.from)
   // console.log(waiter)
+  console.log('youtube-dl --extract-audio --audio-quality 0 --audio-format mp3  --output ' + './media/audio/' + message.from + '.%(ext)s" ' + link)
   await nrc.run('youtube-dl --extract-audio --audio-quality 0 --audio-format mp3  --output ' + './media/audio/' + message.from + '.%(ext)s" ' + link)
   if (Math.round(fs.statSync('./media/audio/' + message.from + '.mp3').size / 1000000) > 99) {
     gclient.sendText(message.from, "File bigger then 100 Mb can't send file")
