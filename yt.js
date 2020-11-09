@@ -12,6 +12,7 @@ const youtubedl = require('youtube-dl')
 const queuejs = require('./queue')
 
 exports.mp3 = async function (message) {
+	const path = './media/audio/' + message.from + '.mp3';
   console.log(amdownloaden)
   if (amdownloaden.indexOf(message.from) > -1) {
     gclient.sendText(message.from, 'Audio added to Queue')
@@ -37,7 +38,7 @@ exports.mp3 = async function (message) {
   // waiter = await downloadmp3(link, message.from)
   // console.log(waiter)
   console.log('youtube-dl --extract-audio --audio-quality 0 --audio-format mp3  --output ' + './media/audio/' + message.from + '.%(ext)s" ' + link)
-  await nrc.run('youtube-dl --extract-audio --audio-quality 0 --audio-format mp3  --output ' + './media/audio/' + message.from + '.%(ext)s" ' + link)
+  await nrc.run('youtube-dl --extract-audio --audio-quality 0 --audio-format mp3  --output ' + '"./media/audio/' + message.from + '.%(ext)s" ' + link)
   if (Math.round(fs.statSync('./media/audio/' + message.from + '.mp3').size / 1000000) > 99) {
     gclient.sendText(message.from, "File bigger then 100 Mb can't send file")
     if (queuemp3.length != 0) {
@@ -45,7 +46,8 @@ exports.mp3 = async function (message) {
     }
     return
   }
-  await gclient.sendFile(message.from, './media/audio/' + message.from + '.mp3', '', '')
+  await gclient.sendPtt(from, './media/audio/' + message.from + '.mp3', id)
+  //await gclient.sendFile(message.from, './media/audio/' + message.from + '.mp3', '', '')
   if (Math.round(fs.statSync('./media/audio/' + message.from + '.mp3').size / 1000000) == 0) {
     var größe = Math.round(fs.statSync('./media/audio/' + message.from + '.mp3').size / 1000) + ' kB'
   } else {
@@ -62,6 +64,15 @@ exports.mp3 = async function (message) {
   if (queuemp3.length != 0) {
     queuejs.mp3(message)
   }
+
+ 	await fs.unlink(path, (err) => {
+	  if (err) {
+	    console.error(err)
+	    return
+	  }
+
+	  //file removed
+	})
   delete require.cache[require.resolve('./queue')]
 }
 
