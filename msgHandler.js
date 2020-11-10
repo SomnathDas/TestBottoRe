@@ -26,7 +26,6 @@ const request = require('request');
 const expa = require('./lib/exp.js')
 const profile = require('./lib/profile.js')
 const malScraper = require('mal-scraper')
-const aiQuote = require('./inspiroBotScrapperPuppeteerVersion.js')
 const ban = JSON.parse(fs.readFileSync('./lib/banned.json'))
 const wel = JSON.parse(fs.readFileSync('./lib/welcome.json'))
 const nsfwgrp = JSON.parse(fs.readFileSync('./lib/nsfw.json'))
@@ -176,6 +175,48 @@ module.exports = msgHandler = async (client, message) => {
         /*case 'donate':
             client.reply(from, '...', '...')
             break*/
+        case '!stickergif':
+        case '!stikergif':
+        case '!sgif':
+            if (isMedia) {
+                if (mimetype === 'video/mp4' && message.duration < 10 || mimetype === 'image/gif' && message.duration < 10) {
+                    const mediaData = await decryptMedia(message, uaOverride)
+                    client.reply(from, '[WAIT] Sedang di proses⏳ silahkan tunggu ± 1 min!', id)
+                    const filename = `./media/aswu.${mimetype.split('/')[1]}`
+                    await fs.writeFileSync(filename, mediaData)
+                    console.log(`gify ${filename} ./media/output.gif --fps=30 --scale=240:240`);
+                    await exec(`gify ${filename} ./media/output.gif --fps=30 --scale=240:240`, async function (error, stdout, stderr) {
+                      if(error) {
+                        console.log(error);
+                      } else {
+                        const gif = await fs.readFileSync('./media/output.gif', { encoding: "base64" })
+                        await client.sendImageAsSticker(from, `data:image/gif;base64,${gif.toString('base64')}`)
+                      }
+                        
+                    })
+                } else (
+                    client.reply(from, '[❗] Kirim video dengan caption *!stickerGif* max 10 sec!', id)
+                )
+            }
+            break
+
+      case 'play':
+            if (args.length == 0) return aruga.reply(from, `Untuk mencari lagu dari youtube\n\nPenggunaan: ${prefix}play judul lagu`, id)
+            axios.get(`https://arugaytdl.herokuapp.com/search?q=${body.slice(6)}`)
+            .then(async (res) => {
+                await aruga.sendFileFromUrl(from, `${res.data[0].thumbnail}`, ``, `Lagu ditemukan\n\nJudul: ${res.data[0].title}\nDurasi: ${res.data[0].duration}detik\nUploaded: ${res.data[0].uploadDate}\nView: ${res.data[0].viewCount}\n\nsedang dikirim`, id)
+                axios.get(`https://arugaz.herokuapp.com/api/yta?url=https://youtu.be/${res.data[0].id}`)
+                .then(async(rest) => {
+                    await aruga.sendPtt(from, `${rest.data.result}`, id)
+                })
+            })
+            break
+
+      case 'aiquote' :
+            const aiquote = await axios.get("http://inspirobot.me/api?generate=true")
+            await client.sendFileFromUrl(from, aiquote.data, 'quote.jpg', 'Powered By http://inspirobot.me/ With ❤️' , id )
+            break
+            
        case 'mp3' :
             yt.mp3(message)
        case 'mp4' :
@@ -219,11 +260,11 @@ module.exports = msgHandler = async (client, message) => {
                 await client.reply(from, 'Wrong Format!', id)
                 }
             break
-        case 'aiquote':
+        /*case 'aiquote':
                 let imgName = Math.floor((Math.random() * 100000) + 1);
                 let aiQuoteUrl = await aiQuote.quoteByAI();
                 await client.sendFileFromUrl(from, aiQuoteUrl,`${imgName}.png`, 'Powered By *https://inspirobot.me/*',  id)
-                break;
+                break;*/
        case 'tts':
             if (args.length === 1) return client.reply(from, '  *!tts [id, en, jp, ar, pt] [texto]*, Exemplo *!tts en olá pessoas*')
             const ttsId = require('node-gtts')('id');
@@ -720,6 +761,12 @@ ${desc}`)
             const lagu = body.slice(7)
             const lirik = await func.liriklagu(lagu)
             client.sendText(from, lirik)
+            break
+
+        case 'instagram':
+            if (args.length == 0) return aruga.reply(from, `To download pictures or videos from instagram\ntype: ${prefix}instagram [link_ig]`, id)
+            const instag = await rugaapi.insta(args[0])
+            await aruga.sendFileFromUrl(from, instag, '', '', id)
             break
 
         case 'anime': 
