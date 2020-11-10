@@ -18,9 +18,13 @@ exports.sendAnimatedSticker = async function (message, client) {
   const buffer = await decryptMedia(message)
   const fileName = `./media/sticker/temp${message.from}.${mime.extension(message.mimetype)}`
   fs.writeFile(fileName, buffer, function (err) {})
-  await nrc.run('ffmpeg -y -i ./media/sticker/temp' + message.from + '.mp4' + './media/sticker/' + message.from + '.gif')
+  // ffmpeg -y -i temp558188263143-1604302614@g.us.mp4 temp558188263143-1604302614@g.us.gif
+  //await nrc.run('ffmpeg -y -i ./media/sticker/temp' + message.from + '.mp4' + './media/sticker/' + message.from + '.gif')
+  console.log(`ffmpeg -y -i ./media/sticker/temp${message.from}.mp4 ./media/sticker/${message.from}.gif`)
+  await nrc.run(`ffmpeg -y -i ./media/sticker/temp${message.from}.mp4 ./media/sticker/${message.from}.gif`);
   await gifFrames({ url: './media/sticker/' + message.from + '.gif', frames: 0 }).then(function (frameData) {
     frameData[0].getImage().pipe(fs.createWriteStream('./media/sticker/firstframe' + message.from + '.png'))
+    //frameData[0].getImage().pipe(fs.createWriteStream(`./media/sticker/firstframe/${message.from}.png`))
   })
   await Jimp.read('./media/sticker/firstframe' + message.from + '.png')
     .then((image) => {
